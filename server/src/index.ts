@@ -33,16 +33,18 @@ app.use(async (ctx, next) => {
 });
 
 const router: Router = new Router({
-    prefix: "/api",
+    prefix: "/auth",
 });
-server(router)
-
-// handle apis
-app.use(router.routes());
-app.use(router.allowedMethods());
 
 // handle statics
 app.use(Static("dist", { maxAge: 1000 }))
+
+// handle apis
+server(router)
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+// default index.html
 app.use(async (ctx, next) => {
     ctx.status = constants.HTTP_STATUS_NOT_FOUND
     await Send(ctx, "dist/index.html")

@@ -1,25 +1,28 @@
 import axios, { AxiosError } from 'axios';
 import { constants } from 'http2';
+import jose from 'jose'
 import Router from 'koa-router';
 import qs from 'qs'
+import { OIDCClient } from '../oidc'
 
-const kakao = {
-    ENDPOINT: "https://kauth.kakao.com/oauth/authorize",
-    REST_API_KEY: "a8b1ecbe88809e47c378b1fdce1e1d61",
-    REDIRECT_URI: "http://127.0.0.1:3000/api/oauth/kakao"
-}
+const kakao_oidc = new OIDCClient({
+    configuration_uri: "https://kauth.kakao.com/.well-known/openid-configuration",
+    client_id: "a8b1ecbe88809e47c378b1fdce1e1d61",
+    redirect_uri: "http://127.0.0.1:3000/auth/oauth/kakao"
+})
 
-export default (router: Router) => {
+const COOKIE_ID_TOKEN = "id_token"
+
+export default async (router: Router) => {
+    await kakao_oidc.init()
+
+
     router.get('/', (ctx, next) => {
         ctx.body = { hello: "world" };
     });
 
     router.get('/login/kakao', (ctx, next) => {
-        const url = new URL(kakao.ENDPOINT)
-        url.searchParams.set("client_id", kakao.REST_API_KEY)
-        url.searchParams.set("redirect_uri", kakao.REDIRECT_URI)
-        url.searchParams.set("response_type", "code")
-        ctx.redirect(url.href)
+        ctx.redirect(kakao_oidc.getAuthorizationRedirectURI().href)
     })
 
     router.get("/oauth/kakao", async (ctx, next) => {
@@ -29,26 +32,14 @@ export default (router: Router) => {
             ctx.body = { message: "invalid request" }
             return
         }
-        try {
-            const oidc_response = await axios({
-                method: "POST",
-                url: "https://kauth.kakao.com/oauth/token",
-                headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                data: qs.stringify({
-                    grant_type: "authorization_code",
-                    client_id: kakao.REST_API_KEY,
-                    redirect_uri: kakao.REDIRECT_URI,
-                    code: code
-                }),
-            })
-            console.log(oidc_response)
-            ctx.body = oidc_response.data
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                ctx.body = error.response?.data
-            }
 
-        }
+        const token = await kakao_oidc.fetchTokenUsingCode(code)
+        console.log(await kakao_oidc.fetchUserinfo(token.access_token))
+        ctx.cookies.set(COOKIE_ID_TOKEN, token.id_token, {
+            overwrite: true,
+            httpOnly: false
+        })
 
+        ctx.redirect("/")
     })
 }
