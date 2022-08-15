@@ -1,0 +1,6 @@
+{
+    "rules": {
+        "import/extensions": "off",
+        "@typescript-eslint/naming-convention": "off"
+    }
+}
