@@ -3,12 +3,13 @@ import Koa from 'koa';
 import Router from 'koa-router';
 import Static from 'koa-static';
 import Send from 'koa-send';
-
+import Proxy from 'koa-proxy';
 import server from '@/server';
 import { constants } from 'http2'
 
 const app: Koa = new Koa();
 const port: number | string = process.env.PORT || 3000;
+const proxy: string | undefined = process.env.PROXY || undefined;
 
 app.use(async (ctx, next) => {
     await next();
@@ -33,20 +34,26 @@ app.use(async (ctx, next) => {
 const router: Router = new Router({
     prefix: "/auth",
 });
-
-// handle statics
-app.use(Static("dist", { maxAge: 1000 }))
-
 // handle apis
 server(router)
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// default index.html
-app.use(async (ctx, next) => {
-    ctx.status = constants.HTTP_STATUS_NOT_FOUND
-    await Send(ctx, "dist/index.html")
-})
+if (proxy === undefined) {
+    // handle statics
+    app.use(Static("dist", { maxAge: 1000 }))
+    // default index.html
+    app.use(async (ctx, next) => {
+        ctx.status = constants.HTTP_STATUS_NOT_FOUND
+        await Send(ctx, "dist/index.html")
+    })
+} else {
+    console.log({ message: "use proxy mode", proxy })
+    app.use(Proxy({
+        host: proxy
+    }));
+}
+
 
 // listen
 console.log({ listen: port })
