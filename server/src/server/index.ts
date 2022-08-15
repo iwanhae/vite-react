@@ -3,7 +3,7 @@ import { constants } from 'http2';
 import jose from 'jose'
 import Router from 'koa-router';
 import qs from 'qs'
-import { OIDCClient } from '../oidc'
+import { OIDCClient } from '@/oidc'
 
 const kakao_oidc = new OIDCClient({
     configuration_uri: "https://kauth.kakao.com/.well-known/openid-configuration",

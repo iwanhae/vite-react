@@ -4,13 +4,11 @@ import Router from 'koa-router';
 import Static from 'koa-static';
 import Send from 'koa-send';
 
-import server from './server';
+import server from '@/server';
 import { constants } from 'http2'
 
 const app: Koa = new Koa();
 const port: number | string = process.env.PORT || 3000;
-
-
 
 app.use(async (ctx, next) => {
     await next();
