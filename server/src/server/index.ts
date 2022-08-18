@@ -7,10 +7,10 @@ import {OidcClient} from '@/oidc';
 
 export const COOKIE_ID_TOKEN = 'id_token';
 
-const kakao_oidc = new OidcClient({
+export const kakao_oidc = new OidcClient({
 	configuration_uri: 'https://kauth.kakao.com/.well-known/openid-configuration',
-	client_id: 'a8b1ecbe88809e47c378b1fdce1e1d61',
-	redirect_uri: 'http://127.0.0.1:3000/auth/oauth/kakao',
+	client_id: '1708e8acc96a6759b07816bed018a57a',
+	redirect_uri: 'http://127.0.0.1:3000/auth/kakao/callback',
 });
 
 const buildRouter = async (router: Router) => {
@@ -20,11 +20,11 @@ const buildRouter = async (router: Router) => {
 		ctx.body = {hello: 'world'};
 	});
 
-	router.get('/login/kakao', (ctx, next) => {
+	router.get('/kakao/login', (ctx, next) => {
 		ctx.redirect(kakao_oidc.getAuthorizationRedirectURI().href);
 	});
 
-	router.get('/oauth/kakao', async (ctx, next) => {
+	router.get('/kakao/callback', async (ctx, next) => {
 		const code = ctx.URL.searchParams.get('code') ?? '';
 		if (code === '') {
 			ctx.status = constants.HTTP_STATUS_BAD_REQUEST;

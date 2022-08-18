@@ -5,7 +5,8 @@ import Router from 'koa-router';
 import koaStatic from 'koa-static';
 import koaSend from 'koa-send';
 import koaProxy from 'koa-proxy';
-import server from '@/server';
+import axios from 'axios';
+import server, {COOKIE_ID_TOKEN, kakao_oidc} from '@/server';
 
 console.log({message: 'starting...'});
 
@@ -41,6 +42,31 @@ const proxy: string | undefined = process.env.PROXY ?? undefined;
 	await server(router);
 	app.use(router.routes());
 	app.use(router.allowedMethods());
+
+	app.use(async (ctx, next) => {
+		if (!ctx.path.startsWith('/v1')) {
+			await next();
+			return;
+		}
+
+		const token = ctx.cookies.get(COOKIE_ID_TOKEN);
+		if (token === undefined) {
+			ctx.status = 401;
+			return;
+		}
+
+		const payload = await kakao_oidc.validateToken(token);
+		const response = await axios({
+			method: ctx.method,
+			url: `https://hic-api.9rum.cc${ctx.path}`,
+			headers: {
+				'kakao-id': payload.sub ?? '',
+			},
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+		ctx.body = response.data;
+	});
 
 	if (proxy === undefined) {
 		// Handle statics

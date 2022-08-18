@@ -1,32 +1,31 @@
-import { AppBar, Button, Grid, IconButton, Toolbar, Typography } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu';
-import React, { useState } from 'react'
-import { Outlet } from 'react-router-dom'
-import BluetoothIcon from '@mui/icons-material/Bluetooth';
+import { Edit } from '@mui/icons-material';
+import { Badge, Fab, Typography } from '@mui/material';
+import { Outlet } from 'react-router-dom';
 
 export default () => {
-    let [showSidebar, setSidebar] = useState<boolean>(false)
-    return (
-        <div className='flex h-screen'>
-            <aside className={`${showSidebar ? "w-64" : "w-10"} py-2 overflow-y-auto transition-all`} >
-                <div className='bg-gray-200 rounded dark:bg-gray-800 shadow-md h-full'>
-                    <IconButton>
-                        <BluetoothIcon />
-
-                    </IconButton>
+    const data = ["서울특별시 강남구", "남산타워", "카카오 판교아지트", "뭔가 새로운 기나긴 장소"]
+    return <>
+        <header className='mx-auto px-2 h-12 flex overflow-x-auto bg-gray-50 rounded shadow-md max-w-screen-lg'>
+            <div className='flex'>
+                <div className='m-auto px-3'>
+                    <Typography >힠!</Typography>
                 </div>
-            </aside>
-            <div className='w-screen transition'>
-                <header className='mx-2 px-2 h-12 flex overflow-x-auto bg-gray-50 rounded shadow-md'>
-                    <div className='flex'>
-                        <Button variant='text' onClick={() => { setSidebar(!showSidebar) }}>abc</Button>
-                        <Button variant='text' onClick={() => { setSidebar(!showSidebar) }}>abc</Button>
-                        <Button variant='text' onClick={() => { setSidebar(!showSidebar) }}>abc</Button>
-                        <Button variant='text' onClick={() => { setSidebar(!showSidebar) }}>abc</Button>
-                    </div>
-                </header>
-                <Outlet />
+                <div className='flex w-max overflow-x-scroll'>
+                    {data.map(item => {
+                        return <div className='m-auto px-1'>
+                            <Badge className='bg-gray-300 rounded-full py-1 px-2'>{item}</Badge>
+                        </div>
+                    })}
+                </div>
             </div>
-        </div >
-    )
+        </header>
+        <Outlet />
+        <div
+            className='fixed z-90 bottom-10 right-8 drop-shadow-lg flex justify-center items-center'>
+            <Fab color="primary" >
+                <Edit />
+            </Fab>
+        </div>
+
+    </>
 }

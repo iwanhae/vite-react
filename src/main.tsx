@@ -11,13 +11,14 @@ import '@fontsource/roboto/700.css';
 
 import '@/pages/sidebar'
 import Sidebar from '@/pages/sidebar';
+import MainPage from '@/pages/main';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<Sidebar />} >
-          <Route path="world" element={<h2>NETSTED</h2>} />
+          <Route path="/" element={<MainPage></MainPage>} />
         </Route>
       </Routes>
     </BrowserRouter>
